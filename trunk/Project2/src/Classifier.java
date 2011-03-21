@@ -1,5 +1,5 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 
 /**
  *  Implements classifying algorithm based on Luis Gravano's QProber
@@ -11,21 +11,41 @@ import java.util.HashMap;
  */
 public class Classifier {
 	
-	public static final int ROOT = 0;
-	public static final int COMPUTERS = 1;
-	public static final int HARDWARE = 2;
-	public static final int PROGRAMMING = 3;
-	public static final int HEALTH = 4;
-	public static final int FITNESS = 5;
-	public static final int DISEASES = 6;
-	public static final int SPORTS = 7;
-	public static final int BASKETBALL = 8;
-	public static final int SOCCER = 9;
-	
 	YahooBossSearcher yahoo;
+	HashMap<String, ArrayList<String>> probes; // Maps category to list of query probes
 	
 	public Classifier(YahooBossSearcher yahoo) {
 		this.yahoo = yahoo;
+		buildHierarchy();
+	}
+	
+	/**
+	 * Build hierarchy
+	 */
+	private void buildHierarchy() {
+		ArrayList<String> probe = new ArrayList<String>();
+		
+		try {
+			
+			// Read file
+			String filename = "root.txt";
+			File file = new File(filename);
+			Scanner scan = new Scanner(file);
+			
+			while (scan.hasNextLine()) {
+				scan.findInLine("(.*?) (.*?)\n");
+				String category = scan.match().group(1);
+				probes.put(category, null);
+				String p = scan.match().group(2);
+				probe.add(p);
+				System.out.println("DEBUG: Reading "+category+" with: "+probe);
+			}
+						
+		} catch (FileNotFoundException e) {
+			System.err.println("Could not open file");
+		}
+		
+		
 	}
 	
 	/**
@@ -37,8 +57,8 @@ public class Classifier {
 	 * @param esp specificity of parent
 	 * @return Categories of given database
 	 */
-	public ArrayList<Integer> classify(int C, String D, int t_ec, float t_es, float esp) {
-		ArrayList<Integer> result = new ArrayList<Integer>();	
+	public ArrayList<String> classify(String C, String D, int t_ec, float t_es, float esp) {
+		ArrayList<String> result = new ArrayList<String>();	
 		
 		// If leaf node, return it
 		if (isLeaf(C)) {
@@ -46,11 +66,11 @@ public class Classifier {
 			return result;
 		}
 		
-		// Get Ecoverage for D
-		HashMap<Integer, Integer> ecoverage = new HashMap<Integer, Integer>();
+		// Get Ecoverage for D: maps category -> coverage
+		HashMap<String, Integer> ecoverage = new HashMap<String, Integer>();
 		
-		// For each subcategory of C
-		for (int cat : getSubcat(C)) {
+		// For each subcategory of C, probe
+		for (String cat : getSubcat(C)) {
 			
 			// Coverage
 			int cov = 0;
@@ -65,12 +85,17 @@ public class Classifier {
 			}
 			
 			ecoverage.put(cat, cov);
+		}
+		
+		// Calculate Especificity vector
+		HashMap<String, Float> especificity = getEspecificity(ecoverage, esp);
+		
+		// For each subcategory of C, classify
+		for (String cat : getSubcat(C)) {
 			
-			// Calculate Especificity
-			float espec = getEspecificity();
-			
-			if (espec >= t_es && cov >= t_ec) {
-				result.addAll(classify(cat, D, t_ec, t_es, espec));
+			// If above thresholds, combine the result
+			if (especificity.get(cat) >= t_es && ecoverage.get(cat) >= t_ec) {
+				result.addAll(classify(cat, D, t_ec, t_es, especificity.get(cat)));
 			}
 		}
 		
@@ -80,28 +105,70 @@ public class Classifier {
 		return result;
 	}
 	
-	private boolean isLeaf(int category) {
+	/**
+	 * If category is a leaf node
+	 * @param category
+	 * @return
+	 */
+	private boolean isLeaf(String category) {
+		if (getSubcat(category).isEmpty())
+			return true;
 		
-		return true;
-		
+		return false;	
 	}
 
-	private int[] getSubcat(int category) {
+	/**
+	 * Return subcategories
+	 * @param category
+	 * @return
+	 */
+	private ArrayList<String> getSubcat(String category) {
+		ArrayList<String> arr = new ArrayList<String>();
+		
+		if (category.equals("Root")) {
+			arr.add("Computers");
+			arr.add("Health");
+			arr.add("Sports");
+		} else if (category.equals("Computers")) {
+			arr.add("Hardware");
+			arr.add("Programming");
+		} else if (category.equals("Health")) {
+			arr.add("Fitness");
+			arr.add("Diseases");
+		} else if (category.equals("Sports")) {
+			arr.add("Basketball");
+			arr.add("Soccer");
+		} 
+		
+		return arr;
+	}
+	
+	/**
+	 * Return query probes
+	 * @param category
+	 * @return
+	 */
+	private ArrayList<String> getQueryProbes(String category) {
+		return probes.get(category);
+	}
+	
+	private HashMap<String, Float> getEspecificity(HashMap<String, Integer> ecoverage, Float esp) {
 		
 		return null;
 		
 	}
 	
-	private ArrayList<String> getQueryProbes(int category) {
-		
-		return null;
-		
-	}
-	
-	private float getEspecificity() {
-		
-		return 0;
-		
-	}
+//	public static void main(String args[]) {
+//		
+//		YahooBossSearcher yahoo = new YahooBossSearcher("ypykm2bV34HB8360S0knusfiUrQYS5A3ZvDlsTIHh13Vw8BPYSUHNloyoJ2bSg--");
+//
+//		Classifier c = new Classifier(yahoo);
+//		
+//		float e = Float.parseFloat("0.6");
+//		
+//		for (String s : c.classify("Root","diabetes.org",100,e,e)) 
+//			System.out.println(s);
+//		
+//	}
 	
 }
