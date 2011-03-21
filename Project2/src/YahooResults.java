@@ -21,12 +21,15 @@ public class YahooResults {
 	private int totalhits = 0;
 	private int deephits = 0;
 	
+	private String rawResult = null;
+	
 	
 	/**
 	 * Constructor with result data
 	 * @param res A string of data in JSON format
 	 */
 	public YahooResults (String res) {
+		rawResult = res; // save for debugging
 		buildArray(res);
 	}
 	
@@ -99,4 +102,15 @@ public class YahooResults {
 		return 0;
 	}
 	
+	public String getRawResult() { // return the JSON string
+		return rawResult;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("count=" + count + ", ");
+		sb.append("totalhits=" + totalhits + ", ");
+		sb.append("deephits=" + deephits);
+		return sb.toString();
+	}
 }
