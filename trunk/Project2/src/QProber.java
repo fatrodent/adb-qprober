@@ -5,6 +5,9 @@
  *  @author Nicole Lee (ncl2108)
  *  @author Laima Tazmin (lt2233)
  */
+
+import java.util.*;
+
 public class QProber {
 
 	/**
@@ -31,9 +34,9 @@ public class QProber {
 	    	System.err.println("Invalid value for t_es. Specificity threshold must be between 0 and 1.");
 	    }
 
-		float t_ec = 0;
+		int t_ec = 0;
 	    try {
-			t_ec = Float.parseFloat(args[2]);
+	    	t_ec = Integer.parseInt(args[2]);
 	    } catch (NumberFormatException e) {
 	        System.err.println("Invalid value for t_ec: " + e.getMessage());
 	        System.exit(1);
@@ -52,13 +55,16 @@ public class QProber {
 		System.out.println("DEBUG: t_ec = " + t_ec);
 		System.out.println("DEBUG: appid = " + appid);
 		
-		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
-		YahooResults results = yahoo.search("xml", host);
-		System.out.println("DEBUG: " + results.getRawResult());
-
-		System.out.println("Result:");
-		System.out.println(results);
+		// Get the probes from files, and build the classification hierarchy
+		Category root = new Category("root", "/Users/Nicole/workspace/Project2/src/categories");		
 		
+		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
+		Classifier2 c = new Classifier2(yahoo);
+		ArrayList<Category> clist = c.classify(root, host, t_ec, t_es, 1);
+
+		for (Category cat: clist) {
+			System.out.println(cat);
+		}
 	}
 
 	/**
