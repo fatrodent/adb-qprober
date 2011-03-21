@@ -94,7 +94,7 @@ public class YahooResults {
 	 * Returns coverage
 	 * @return
 	 */
-	public float getCoverage() {
+	public int getCoverage() {
 		return totalhits;
 	}
 	
