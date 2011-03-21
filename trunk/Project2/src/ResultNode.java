@@ -79,7 +79,7 @@ public class ResultNode {
 	 * @return
 	 */
 	public String getWebPage() throws IOException {
-		return YahooSearchBOSS.urlGet(url);
+		return YahooBossSearcher.urlGet(url);
 	}
 	
 	/**

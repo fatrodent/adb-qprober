@@ -18,27 +18,13 @@ public class YahooBossSearcher {
 		_appid = appid;
 	}
 
-//	public YahooTop10Results search (String term, String site) {
-//		YahooTop10Results result = null;
-//		try {
-//			String termenc = URLEncoder.encode(term,"UTF-8");
-//			String url = _urlbase + termenc + "?appid=" + _appid + "&sites=" + site + "&format=json";
-//			System.out.println("URL: " + url); // @@@ debug
-//			String page = urlGet(url);
-//			result = new YahooTop10Results(page);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-//		return result;
-//	}
-
-	public String search (String term) {
+	public YahooResults search (String term) {
 		return search(term, null);
 	}
 	
-	public String search (String term, String site) {
+	public YahooResults search (String term, String site) {
 		String page = null;
+		YahooResults results = null;
 		try {
 			String termenc = URLEncoder.encode("\"" + term + "\"","UTF-8");			
 			//String termenc = URLEncoder.encode(term,"UTF-8");
@@ -48,10 +34,12 @@ public class YahooBossSearcher {
 			}
 			System.out.println("URL: " + url); // @@@ debug
 			page = urlGet(url);
+			results = new YahooResults(page);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return page;		
+		//return page;
+		return results;
 	}
 	
 	public static String urlGet (String urlstr) throws MalformedURLException, IOException {

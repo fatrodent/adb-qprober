@@ -38,8 +38,8 @@ public class QProber {
 	        System.err.println("Invalid value for t_ec: " + e.getMessage());
 	        System.exit(1);
 	    }
-	    if (t_ec < 0) {
-	    	System.err.println("Invalid value for t_ec. Coverage threshold must be greater than 0.");
+	    if (t_ec < 1) {
+	    	System.err.println("Invalid value for t_ec. Coverage threshold must be >= 1.");
 	    }
 		
 		// Set appid (optional)
@@ -53,9 +53,11 @@ public class QProber {
 		System.out.println("DEBUG: appid = " + appid);
 		
 		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
-		String page = yahoo.search("avi file", host);
+		YahooResults results = yahoo.search("xml", host);
+		System.out.println("DEBUG: " + results.getRawResult());
+
 		System.out.println("Result:");
-		System.out.println(page);
+		System.out.println(results);
 		
 	}
 
