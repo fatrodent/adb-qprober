@@ -7,8 +7,7 @@
  *  @author Laima Tazmin (lt2233)
  */
 
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class YahooResults {
 	
@@ -21,7 +20,7 @@ public class YahooResults {
 	private int totalhits = 0;
 	private int deephits = 0;
 	
-	private int top_k = 4; // hard-coded
+	private int top_k = 4; // top 4 results
 	private String rawResult = null;
 	
 	
@@ -33,7 +32,7 @@ public class YahooResults {
 		rawResult = res; // save for debugging
 		buildArray(res);
 	}
-	
+
 	/**
 	 * Parses results data and compiles into an object array
 	 * @param res A string of data in JSON format
@@ -60,8 +59,8 @@ public class YahooResults {
 		// Parse the results abstract
 		//String abstractRes = "\"abstract\":\"(.*?)\",.*?\"title\":\".*?\",\"url\":\".*?\"";
 		
-		// Store top-k results into array
-		for (int i = 0; i < top_k; i++) {
+		// Store up to top-k results into array
+		for (int i = 0; i < Math.min(top_k, totalhits); i++) {
 			scan.findInLine(matchRes); // Match one result
 
 			// Store the three values into ResultNode
