@@ -21,6 +21,7 @@ public class YahooResults {
 	private int totalhits = 0;
 	private int deephits = 0;
 	
+	private int top_k = 4; // hard-coded
 	private String rawResult = null;
 	
 	
@@ -57,20 +58,20 @@ public class YahooResults {
 		String matchRes = "\"abstract\":\"(.*?)\",.*?\"title\":\"(.*?)\",\"url\":\"(.*?)\"";
 		
 		// Parse the results abstract
-		String abstractRes = "\"abstract\":\"(.*?)\",.*?\"title\":\".*?\",\"url\":\".*?\"";
+		//String abstractRes = "\"abstract\":\"(.*?)\",.*?\"title\":\".*?\",\"url\":\".*?\"";
 		
-		// Store each result into array
-		for (int i = 0; i < count; i++) {
-			scan.findInLine(abstractRes); // Match one result
+		// Store top-k results into array
+		for (int i = 0; i < top_k; i++) {
+			scan.findInLine(matchRes); // Match one result
 
 			// Store the three values into ResultNode
 			String summary = scan.match().group(1);
-			//String title = scan.match().group(2);
-			//String url = scan.match().group(3);
+			String title = scan.match().group(2);
+			String url = scan.match().group(3);
 			
-			//ResultNode node = new ResultNode(i, summary, title, url);
-			//_arr.add(node);
-			_summ.add(summary);
+			ResultNode node = new ResultNode(i, summary, title, url);
+			_arr.add(node);
+			//_summ.add(summary);
 		}
 		
 		scan.close();
@@ -82,6 +83,24 @@ public class YahooResults {
 	 */
 	public ArrayList<ResultNode> getResultNodes() {
 		return _arr;
+	}
+	
+	/**
+	 * Returns result's web pages
+	 * @return
+	 */
+	public ArrayList<String> getDocs() {
+		ArrayList<String> res = new ArrayList<String>();
+		
+		for (ResultNode r : _arr) {
+			try {
+				res.add(r.getWebPage());
+			} catch (Exception e) {
+				res.add(r.getTitle()+" "+r.getSummary());
+			}
+		}
+		
+		return res;
 	}
 	
 	public int getResultCount () {

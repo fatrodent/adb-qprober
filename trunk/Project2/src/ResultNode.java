@@ -14,7 +14,6 @@ public class ResultNode {
 	private String title;
 	private String url;
 	private String summary;
-	private boolean relevant = false; // Tracks if the result is relevant
 	private ArrayList<String> terms = new ArrayList<String>();
 
 	/**
@@ -29,25 +28,6 @@ public class ResultNode {
 		this.title = trim(title);
 		this.url = trim(url);
 		this.summary = trim(summary);
-	}
-	
-	/**
-	 * Sets the relevance of a result
-	 * @param bool a String that is "N" or "Y"
-	 */
-	public void setRelevance (String bool) {
-		if (bool.equalsIgnoreCase("Y"))
-			relevant = true;
-		else
-			relevant = false;
-	}
-	
-	/**
-	 * Returns if a result is relevant or not
-	 * @return A boolean false or true
-	 */
-	public boolean isRelevant () {
-		return relevant;
 	}
 	
 	/**
