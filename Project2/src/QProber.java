@@ -56,7 +56,7 @@ public class QProber {
 		System.out.println("DEBUG: appid = " + appid);
 		
 		// Get the probes from files, and build the classification hierarchy
-		Category root = new Category("root", "/Users/Nicole/workspace/Project2/src/categories");		
+		Category root = new Category("Root", "/Users/Nicole/workspace/Project2/src/categories");		
 		
 		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
 		Classifier2 c = new Classifier2(yahoo);

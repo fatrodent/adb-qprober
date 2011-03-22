@@ -54,7 +54,13 @@ public class Classifier2 {
 				int matches = results.getCoverage();
 				cov += matches;
 			}
-			c.setECoverage(d,cov);
+			cat.setECoverage(d,cov);
+		}
+		
+		// DEBUG
+		for (Category cat: c.getChildren()) {
+			int cov = cat.getECoverage(d);
+			System.out.println("ECoverage("+d+","+cat+")="+cov);
 		}
 		
 		// Calculate ESpecificity vector
@@ -62,6 +68,7 @@ public class Classifier2 {
 		for (Category cat: c.getChildren()) {
 			float s = calculateESpecificity(d, cat);
 			//eSpecificity.put(cat.getName(), s);
+			System.out.println("ESpecificity("+d+","+cat+")="+s); // debug
 		}
 		
 		// For each subcategory of C, classify
@@ -94,7 +101,7 @@ public class Classifier2 {
 		float eSpecificity = ( parent.getESpecificity(d) * c.getECoverage(d) ) / sumCoverage;
 		c.setESpecificity(d,eSpecificity);
 		
-		System.out.println("DEBUG: ESpecificity(" + c + ") = " + eSpecificity);
+		//System.out.println("DEBUG: ESpecificity(" + c + ") = " + eSpecificity);
 		return eSpecificity;
 	}
 }
