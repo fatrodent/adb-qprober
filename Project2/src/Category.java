@@ -5,12 +5,13 @@ public class Category {
 	//private static final char pathDelimiter = '\\' ;  // Windows
 	private static final char pathDelimiter = '/' ; // Unix
 	
-	private String name;
+	private String name;      // e.g. Programming
+	private String fullname;  // e.g. Root/Computers/Programming
+
 	private Category parent = null; // root has no parent
 	private String probepath;
 	private String probefile;
 	private HashMap<String,Category> children = new HashMap<String,Category>(); // all sub-categories
-	//private HashSet<String> probes = new HashSet<String>(); // note: root category has no probes
 	private ArrayList<String> probes = new ArrayList<String>();
 	
 	// Calculated data
@@ -24,14 +25,25 @@ public class Category {
 
 	public Category (String name, String path) {
 		this.name = name;
+		this.fullname = name; // Root
 		this.probepath = path;
 		this.probefile = this.probepath + pathDelimiter + name.toLowerCase() + ".txt";
 		buildHierarchy(this.probefile);
 	}
 
-	public void setParent(Category c) {
-		parent = c;
+	public Category (Category parent, String name, String path) {
+		this.parent = parent;
+		this.name = name;
+		this.fullname = parent.getFullName() + "/" + name;
+		this.probepath = path;
+		this.probefile = this.probepath + pathDelimiter + name.toLowerCase() + ".txt";
+		buildHierarchy(this.probefile);
 	}
+	
+//	public void setParent(Category c) {
+//		parent = c;
+//		fullname = parent.getFullName() + "/" + name;
+//	}
 
 	public Category getParent() {
 		return parent;
@@ -42,6 +54,10 @@ public class Category {
 	}
 	public String getName () { // return category name
 		return name;
+	}
+
+	public String getFullName() {
+		return fullname;
 	}
 	
 	public void addProbe(String p) {
@@ -78,6 +94,10 @@ public class Category {
 		return (children.size() == 0); // no children == leaf node
 	}
 	
+	public boolean isRoot() {
+		return (parent == null); // root node has no parent
+	}
+	
 	/**
 	 * read text file for sub-categories and probes
 	 */
@@ -94,10 +114,10 @@ public class Category {
 					String probe     = arr[1]; // child's probe
 
 					Category child;
-					if (! children.containsKey(childName)) {
-						child = new Category(childName, probepath);
-						child.setParent(this); // @@@ Need this?
+					if (! children.containsKey(childName)) { // first time we see this sub-category
+						child = new Category(this, childName, probepath);
 						children.put(childName, child);
+						//System.out.println("Adding category " + child.getFullName());
 					} else {
 						child = children.get(childName);
 					}
@@ -107,31 +127,12 @@ public class Category {
 				scanner.close();
 			}
 		} catch (FileNotFoundException e) {
-			// Leaf node if no more category file
-			// @@@ TODO: debug code, comment this out 
-			System.out.println("Leaf-level category: " + name);
+			// Leaf node if no more category file - ignore this exception
+			//System.out.println("Leaf-level category: " + name);
 		}
 	}
 
-//	public String debugSring() {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append(name + ":");
-//		for (String k : children.keySet()) {
-//			sb.append(" " + k);
-//		}
-//		sb.append("\n");
-//		sb.append(name + " probes:\n");
-//		for (String p : probes) {
-//			sb.append (" " + p + "\n");
-//		}
-//
-//		// get child's children...
-//		for (String k : children.keySet()) {
-//			sb.append(children.get(k));
-//		}
-//		return sb.toString();
-//	}
 	public String toString() {
-		return name;
+		return "category:" + name;
 	}
 }
