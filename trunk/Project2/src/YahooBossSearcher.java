@@ -38,7 +38,9 @@ public class YahooBossSearcher {
 		} catch (Exception e) {
         	// print and continue
         	// ignore any connection problems such as HTTP 503
-        	System.err.println(e.getMessage());
+			//e.printStackTrace(); // @@@ DEBUG
+        	System.err.println("WARNING: search("+term+","+site+"): " + e.getMessage());
+        	//results = new YahooResults();
 		}
 		//return page;
 		return results;

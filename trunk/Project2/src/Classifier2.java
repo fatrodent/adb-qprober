@@ -16,7 +16,7 @@ public class Classifier2 {
 
 	// Calculate Especificity vector
 	// Maps Category Name to ESpecificity value
-	private HashMap<String, Float> eSpecificity = new HashMap<String, Float>();
+	//private HashMap<String, Float> eSpecificity = new HashMap<String, Float>();
 	
 	// Pre-built category hierarchy.
 	public Classifier2(YahooBossSearcher yahoo) { // Category root) {
@@ -42,49 +42,41 @@ public class Classifier2 {
 			return result;
 		}
 		
-		// Get Ecoverage for D: maps category -> coverage
-		HashMap<String, Integer> ecoverage = new HashMap<String, Integer>();
-		
 		// For each sub-category of C, probe
-		for (Category cat: c.getChildren()) {
+		for (Category subcat: c.getChildren()) {
 
 			// For each query probe, count matches
 			int cov = 0;  // Coverage
-			for (String probe : cat.getProbes() ) {
+			for (String probe : subcat.getProbes() ) {
 				// Get result and count matches
 				YahooResults results = yahoo.search(probe, d);
+				if (results == null) continue;
 				int matches = results.getCoverage();
 				cov += matches;
 				// Store doc samples
 				docSamples = results.getDocs();
 			}
-			cat.setECoverage(d,cov);
-		}
-		
-		// DEBUG
-		for (Category cat: c.getChildren()) {
-			int cov = cat.getECoverage(d);
-			System.out.println("ECoverage("+d+","+cat+")="+cov);
+			subcat.setECoverage(d,cov);
 		}
 		
 		// Calculate ESpecificity vector
-		//HashMap<String, Float> eSpecificity = new HashMap<String, Float>();
-		for (Category cat: c.getChildren()) {
-			float s = calculateESpecificity(d, cat);
-			//eSpecificity.put(cat.getName(), s);
-			System.out.println("ESpecificity("+d+","+cat+")="+s); // debug
+		for (Category subcat: c.getChildren()) {
+			calculateESpecificity(d, subcat);
+			System.out.println("Specificity for "+subcat+" is "+ subcat.getESpecificity(d));
+			System.out.println("Coverage for "+subcat+" is "+ subcat.getECoverage(d));			
 		}
 		
-		// For each subcategory of C, classify
-		for (Category cat: c.getChildren()) {
-			if (cat.getESpecificity(d) >= t_es && cat.getECoverage(d) >= t_ec) {
-				result.addAll(classify(cat, d, t_ec, t_es, cat.getESpecificity(d)));
+		// For each sub-category of C, classify
+		for (Category subcat: c.getChildren()) {
+			if (subcat.getESpecificity(d) >= t_es && subcat.getECoverage(d) >= t_ec) {
+				result.addAll(classify(subcat, d, t_ec, t_es, subcat.getESpecificity(d)));
 			}
 		}
 		
 		if (result.isEmpty())
 			result.add(c);
 		
+		//System.out.println("DEBUG: "+c+" result:" + result);
 		return result;
 	}
 
@@ -93,7 +85,7 @@ public class Classifier2 {
 	 * D = Database or site 
 	 * C = Category 
 	 */
-	private float calculateESpecificity(String d, Category c) {
+	private void calculateESpecificity(String d, Category c) {
 		Category parent = c.getParent();
 
 		// sum of the ECoverage for all children of the parent
@@ -106,6 +98,6 @@ public class Classifier2 {
 		c.setESpecificity(d,eSpecificity);
 		
 		//System.out.println("DEBUG: ESpecificity(" + c + ") = " + eSpecificity);
-		return eSpecificity;
+		//return eSpecificity;
 	}
 }

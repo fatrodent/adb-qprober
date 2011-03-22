@@ -10,9 +10,6 @@ import java.util.*;
 
 public class QProber {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		
 		// Check if there are 2 or 3 arguments provided
@@ -49,27 +46,30 @@ public class QProber {
 		String appid = (args.length >= 4) ? args[3] : 
 			"ypykm2bV34HB8360S0knusfiUrQYS5A3ZvDlsTIHh13Vw8BPYSUHNloyoJ2bSg--";
 
-		
-		System.out.println("DEBUG: host = " + host);
-		System.out.println("DEBUG: t_es = " + t_es);
-		System.out.println("DEBUG: t_ec = " + t_ec);
-		System.out.println("DEBUG: appid = " + appid);
-		
+//		System.out.println("DEBUG: host = " + host);
+//		System.out.println("DEBUG: t_es = " + t_es);
+//		System.out.println("DEBUG: t_ec = " + t_ec);
+//		System.out.println("DEBUG: appid = " + appid);
+
 		// Get the probes from files, and build the classification hierarchy
 		Category root = new Category("Root", "/Users/Nicole/workspace/Project2/src/categories");		
+		
+		System.out.println("\n\nClassifying...");
 		
 		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
 		Classifier2 c = new Classifier2(yahoo);
 		ArrayList<Category> clist = c.classify(root, host, t_ec, t_es, 1);
 
+		System.out.println("\n\nClassification:");
 		for (Category cat: clist) {
-			System.out.println(cat);
+			System.out.println(cat.getFullName());
 		}
 	}
 
 	/**
 	 * Returns an error message and usage information
-	 * @param errMsg A string with the desired error message
+	 * 
+	 * @param errMsg  an error string
 	 */
     public static void usage(String errMsg) {
     	if (errMsg != null)
