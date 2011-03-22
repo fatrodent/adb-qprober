@@ -38,19 +38,21 @@ public class YahooResults {
 	 * @param res A string of data in JSON format
 	 */
 	private void buildArray(String res) {
-		
+		//System.out.println("DEBUG: result="+res);  //@@@ DEBUG
 		Scanner scan = new Scanner(res);
 		
 		// Parse the no of results
 		scan.findInLine("\"totalhits\":\"(\\w+)\"");
 		totalhits = Integer.parseInt(scan.match().group(1));
-		
+
 		scan.findInLine("\"deephits\":\"(\\w+)\"");
 		deephits = Integer.parseInt(scan.match().group(1));
 		
 		scan.findInLine("\"count\":\"(\\w+)\"");
 		count = Integer.parseInt(scan.match().group(1));
-		
+
+		//System.out.println("DEBUG: totalhits="+totalhits+", deephits="+deephits+", count="+ count); //@@@ DEBUG
+
 		// Parse the results abstract, title and url
 		String matchRes = "\"abstract\":\"(.*?)\",.*?\"title\":\"(.*?)\",\"url\":\"(.*?)\"";
 		

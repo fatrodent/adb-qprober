@@ -78,7 +78,7 @@ public class ResultNode {
 	 * Returns result's web page
 	 * @return
 	 */
-	public String getWebPage() throws IOException {
+	public String getWebPage() throws Exception {
 		return YahooBossSearcher.urlGet(url);
 	}
 	
@@ -105,7 +105,7 @@ public class ResultNode {
 		String text = "";
 		try { 
 			text = trim(getWebPage()); 
-		} catch (IOException e) { 
+		} catch (Exception e) { 
 			text = title + " " + summary; 
 		}
 		String[] words = text.split(" ");
