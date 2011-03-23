@@ -6,6 +6,7 @@
  *  @author Laima Tazmin (lt2233)
  */
 
+import java.io.File;
 import java.util.*;
 
 public class QProber {
@@ -13,16 +14,38 @@ public class QProber {
 	public static void main(String[] args) {
 		
 		// Check if there are 2 or 3 arguments provided
-		if (args.length < 3 || args.length > 4)
+		if (args.length < 4 || args.length > 5)
 			usage("Invalid Arguments");
 
+		int i = 0; // process each argument, starting from 0th
+		
+		// Working Directory - where category and cache directories are
+		// The category files should be copied in from a wrapper script
+		// workdir/category  - contains category files
+		// workdir/cache     - writeable directory to cache pages
+		String workdir = args[i++];
+		String catdir  = workdir + "/categories";
+		String cachedir = workdir + "/cache";
+
+		// Die if category directory does not exist 
+		if (! (new File(catdir)).exists()) {		
+			System.err.println("Directory " + catdir + " does not exist");
+			System.exit(1);
+		}
+		// Create cachedir if it does not exist
+		File cdir= new File(cachedir);
+		if (! cdir.exists() && ! cdir.mkdir()) {		
+			System.err.println("Unable to mkdir " + cachedir);
+			System.exit(1);
+		}
+		
 		// Set search string
-		String host = args[0];
+		String host = args[i++];
 
 		// Convert t_es and t_ec to real numbers
 		float t_es = 0;
 	    try {
-			t_es = Float.parseFloat(args[1]);
+			t_es = Float.parseFloat(args[i++]);
 	    } catch (NumberFormatException e) {
 	        System.err.println("Invalid value for t_es: " + e.getMessage());
 	        System.exit(1);
@@ -33,7 +56,7 @@ public class QProber {
 
 		int t_ec = 0;
 	    try {
-	    	t_ec = Integer.parseInt(args[2]);
+	    	t_ec = Integer.parseInt(args[i++]);
 	    } catch (NumberFormatException e) {
 	        System.err.println("Invalid value for t_ec: " + e.getMessage());
 	        System.exit(1);
@@ -43,20 +66,23 @@ public class QProber {
 	    }
 		
 		// Set appid (optional)
-		String appid = (args.length >= 4) ? args[3] : 
+		String appid = (args.length > i) ? args[i++] : 
 			"ypykm2bV34HB8360S0knusfiUrQYS5A3ZvDlsTIHh13Vw8BPYSUHNloyoJ2bSg--";
 
-//		System.out.println("DEBUG: host = " + host);
-//		System.out.println("DEBUG: t_es = " + t_es);
-//		System.out.println("DEBUG: t_ec = " + t_ec);
-//		System.out.println("DEBUG: appid = " + appid);
+		System.out.println("DEBUG: workdir = " + workdir);
+		System.out.println("DEBUG: host = " + host);
+		System.out.println("DEBUG: t_es = " + t_es);
+		System.out.println("DEBUG: t_ec = " + t_ec);
+		System.out.println("DEBUG: appid = " + appid);
+
 
 		// Get the probes from files, and build the classification hierarchy
-		Category root = new Category("Root", "/Users/Nicole/workspace/Project2/src/categories");		
-		
+		Category root = new Category("Root", catdir);		
+
+		// QProber
 		System.out.println("\n\nClassifying...");
 		
-		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
+		YahooBossSearcher yahoo = new YahooBossSearcher(appid, cachedir);
 		Classifier2 c = new Classifier2(yahoo);
 		ArrayList<Category> clist = c.classify(root, host, t_ec, t_es, 1);
 
@@ -64,6 +90,9 @@ public class QProber {
 		for (Category cat: clist) {
 			System.out.println(cat.getFullName());
 		}
+
+		// Content Summary
+		System.out.println("\n\nExtracting topic content summaries...");
 	}
 
 	/**
@@ -86,7 +115,7 @@ public class QProber {
         StackTraceElement main = stack[stack.length - 1];
         String mainClass = main.getClassName ();
         
-        System.err.println("Usage: " + mainClass + " <host> <t_es> <t_ec> [<yahoo appId>]");
+        System.err.println("Usage: " + mainClass + " <workdir> <host> <t_es> <t_ec> [<yahoo appId>]");
         System.exit(1);
     }
 }
