@@ -13,6 +13,7 @@ public class Category {
 	private String probefile;
 	private HashMap<String,Category> children = new HashMap<String,Category>(); // all sub-categories
 	private ArrayList<String> probes = new ArrayList<String>();
+	private ArrayList<String> docSample = new ArrayList<String>(); // list of urls for sampling
 	
 	// Calculated data
 	// site -> value
@@ -34,7 +35,7 @@ public class Category {
 	public Category (Category parent, String name, String path) {
 		this.parent = parent;
 		this.name = name;
-		this.fullname = parent.getFullName() + "/" + name;
+		this.fullname = parent.getFullName() + pathDelimiter + name;
 		this.probepath = path;
 		this.probefile = this.probepath + pathDelimiter + name.toLowerCase() + ".txt";
 		buildHierarchy(this.probefile);
@@ -97,6 +98,17 @@ public class Category {
 	public boolean isRoot() {
 		return (parent == null); // root node has no parent
 	}
+		
+	/**
+	 * Add unique url samples from the query probes for this category
+	 * @param docs
+	 */
+	public void addDocSample(ArrayList<String> urls) {
+		for (String url : urls) {
+			if (!docSample.contains(url))
+				docSample.add(url);
+		}
+	}
 	
 	/**
 	 * read text file for sub-categories and probes
@@ -129,6 +141,83 @@ public class Category {
 		} catch (FileNotFoundException e) {
 			// Leaf node if no more category file - ignore this exception
 			//System.out.println("Leaf-level category: " + name);
+		}
+	}
+	
+	/**
+	 * Extracts list of words from each URL, combines with document frequency count
+	 * Writes content summary to file
+	 */
+	public void buildContentSummary(String host) {
+		HashMap<String, Integer> contentSumm = new HashMap<String, Integer> ();
+		
+		for (String url : docSample) {
+			try {
+				// Retrieve page with Lynx
+				System.out.println("\nGetting page: "+url +"\n");
+				Set<String> words = getWordsLynx.runLynx("lynx",url);
+				
+				// @@@ TODO - Store in cache and use a progress counter
+				
+				// Merge new list with existing list
+				merge(contentSumm, words);
+				
+			} catch (Exception e) {
+				// Couldn't get URL	
+				System.err.println("WARNING: Could not retrieve "+url+" for extraction.");
+			}
+		}
+
+		// Format HashMap to string
+		ArrayList<String> sb = new ArrayList<String>();
+		for (Map.Entry<String, Integer> m : contentSumm.entrySet()) {
+			sb.add(m.getKey() + "#" + m.getValue());
+		}
+		
+		Collections.sort(sb);
+		
+		// Create file
+		writeContentSummary(sb, host);
+		
+		// DEBUG: Print to console
+		//System.out.println(sb);
+	}
+	
+	/**
+	 * Adds a new list of words to existing list and counts document frequency
+	 * @param summ
+	 * @param words
+	 */
+	public void merge(HashMap<String, Integer> summ, Set<String> words) {
+		
+		for (String word : words) {
+			if (summ.containsKey(word)) {
+				// Increase doc frequency
+				int freq = summ.get(word);
+				summ.remove(word);
+				summ.put(word, ++freq);
+			} else {
+				// First time seeing word, doc frequency = 1
+				summ.put(word, 1);
+			}
+		}
+	}
+	
+	/**
+	 * Write content summary to file
+	 * @param s
+	 * @param host
+	 */
+	public void writeContentSummary(ArrayList<String> sb, String host) {
+		// File name: Category-Host.txt
+		String filename = name + "-" + host + ".txt";
+		
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(filename));
+			for (String s : sb) out.append(s + "\n");
+			out.close();
+		} catch (Exception e) {
+			System.err.println("Could not write "+filename);
 		}
 	}
 
