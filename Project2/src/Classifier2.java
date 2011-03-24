@@ -11,13 +11,6 @@ import java.util.*;
 public class Classifier2 {
 	private YahooBossSearcher yahoo;
 	
-	// Store document samples
-	ArrayList<String> docSamples = new ArrayList<String>();
-
-	// Calculate Especificity vector
-	// Maps Category Name to ESpecificity value
-	//private HashMap<String, Float> eSpecificity = new HashMap<String, Float>();
-	
 	// Pre-built category hierarchy.
 	public Classifier2(YahooBossSearcher yahoo) { // Category root) {
 		this.yahoo = yahoo;
@@ -54,7 +47,7 @@ public class Classifier2 {
 				int matches = results.getCoverage();
 				cov += matches;
 				// Store doc samples
-				docSamples = results.getDocs();
+				c.addDocSample(results.getURLs());
 			}
 			subcat.setECoverage(d,cov);
 		}

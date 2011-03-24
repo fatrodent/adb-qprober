@@ -1,5 +1,5 @@
 /**
- *  Parse JSON results from search
+ *  Parse JSON results from search and extracts samples
  *  
  *  COMS E6111 - Project 2  03/25/2011
  *  
@@ -11,10 +11,8 @@ import java.util.*;
 
 public class YahooResults {
 	
-	// Results
-	private ArrayList<ResultNode> _arr = new ArrayList<ResultNode>(); 
-	// Summaries
-	private ArrayList<String> _summ = new ArrayList<String>();
+	// URLs
+	private ArrayList<String> _url = new ArrayList<String>();
 	// Count
 	private int count = 0;
 	private int totalhits = 0;
@@ -34,7 +32,7 @@ public class YahooResults {
 	}
 
 	/**
-	 * Parses results data and compiles into an object array
+	 * Parses results data and stores urls
 	 * @param res A string of data in JSON format
 	 */
 	private void buildArray(String res) {
@@ -56,58 +54,24 @@ public class YahooResults {
 		// Parse the results abstract, title and url
 		String matchRes = "\"abstract\":\"(.*?)\",.*?\"title\":\"(.*?)\",\"url\":\"(.*?)\"";
 		
-		// Parse the results abstract
-		//String abstractRes = "\"abstract\":\"(.*?)\",.*?\"title\":\".*?\",\"url\":\".*?\"";
-		
 		// Store up to top-k results into array
 		for (int i = 0; i < Math.min(top_k, totalhits); i++) {
 			scan.findInLine(matchRes); // Match one result
 
-			// Store the three values into ResultNode
-			String summary = scan.match().group(1);
-			String title = scan.match().group(2);
+			// Store the url for sampling
 			String url = scan.match().group(3);
-			
-			ResultNode node = new ResultNode(i, summary, title, url);
-			_arr.add(node);
-			//_summ.add(summary);
+			_url.add(trim(url));
 		}
 		
 		scan.close();
 	}
 	
 	/**
-	 * Returns result nodes
+	 * Returns result's URLs
 	 * @return
 	 */
-	public ArrayList<ResultNode> getResultNodes() {
-		return _arr;
-	}
-	
-	/**
-	 * Returns result's web pages
-	 * @return
-	 */
-	public ArrayList<String> getDocs() {
-		ArrayList<String> res = new ArrayList<String>();
-		
-		for (ResultNode r : _arr) {
-			try {
-				res.add(r.getWebPage());
-			} catch (Exception e) {
-				res.add(r.getTitle()+" "+r.getSummary());
-			}
-		}
-		
-		return res;
-	}
-	
-	public int getResultCount () {
-		return _arr.size();
-	}
-	
-	public ArrayList<String> getResultSummaries() {
-		return _summ;
+	public ArrayList<String> getURLs() {
+		return _url;
 	}
 	
 	/**
@@ -118,12 +82,23 @@ public class YahooResults {
 		return totalhits;
 	}
 	
-	public float getSpecificity() {
-		return 0;
-	}
-	
 	public String getRawResult() { // return the JSON string
 		return rawResult;
+	}
+
+	/**
+	 * Removes HTML code and replaces escaped characters
+	 * @param str A string from Yahoo
+	 * @return A clean string
+	 */
+	public static String trim(String str) {
+		String newStr = null;
+
+		newStr = str.replaceAll("\\<.*?\\>", "");
+		newStr = newStr.replaceAll("\\\\/", "/");
+		newStr = newStr.replaceAll("\\\\\"", "\"");
+
+		return newStr;
 	}
 	
 	public String toString() {

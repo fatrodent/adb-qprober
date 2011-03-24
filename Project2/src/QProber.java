@@ -13,7 +13,7 @@ public class QProber {
 
 	public static void main(String[] args) {
 		
-		// Check if there are 2 or 3 arguments provided
+		// Check if there are 4 or 5 arguments provided
 		if (args.length < 4 || args.length > 5)
 			usage("Invalid Arguments");
 
@@ -75,24 +75,34 @@ public class QProber {
 		System.out.println("DEBUG: t_ec = " + t_ec);
 		System.out.println("DEBUG: appid = " + appid);
 
-
 		// Get the probes from files, and build the classification hierarchy
 		Category root = new Category("Root", catdir);		
 
 		// QProber
-		System.out.println("\n\nClassifying...");
-		
 		YahooBossSearcher yahoo = new YahooBossSearcher(appid, cachedir);
 		Classifier2 c = new Classifier2(yahoo);
+		
+		System.out.println("\n\nClassifying...");
 		ArrayList<Category> clist = c.classify(root, host, t_ec, t_es, 1);
 
 		System.out.println("\n\nClassification:");
+		// @@@ - seems like it only ever returns one category, loop isn't necessary?
 		for (Category cat: clist) {
 			System.out.println(cat.getFullName());
 		}
 
 		// Content Summary
 		System.out.println("\n\nExtracting topic content summaries...");
+		for (Category cat : clist) {
+			Category cp = cat;
+			while (cp != null) {
+				if (!cp.isLeaf()) {
+					System.out.println("Creating Content Summary for "+cp);
+					cp.buildContentSummary(host);
+				}
+				cp = cp.getParent();
+			}
+		}
 	}
 
 	/**
