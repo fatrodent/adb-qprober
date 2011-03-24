@@ -2,50 +2,41 @@ import java.io.*;
 import java.util.*;
 
 public class Category {
-	//private static final char pathDelimiter = '\\' ;  // Windows
-	private static final char pathDelimiter = '/' ; // Unix
+	private static final char pathDelimiter = '/' ;
 	
 	private String name;      // e.g. Programming
 	private String fullname;  // e.g. Root/Computers/Programming
 
-	private Category parent = null; // root has no parent
+	private Category parent;  // root has no parent, and value is null
 	private String probepath;
 	private String probefile;
 	private HashMap<String,Category> children = new HashMap<String,Category>(); // all sub-categories
 	private ArrayList<String> probes = new ArrayList<String>();
-	private ArrayList<String> docSample = new ArrayList<String>(); // list of urls for sampling
+
+	// maps query string to top 4 doc samples
+	private HashMap<String,ArrayList<String>> docSampleHash = new HashMap<String,ArrayList<String>> ();
 	
-	// Calculated data
-	// site -> value
-	private HashMap<String,Integer> eCoverage = new HashMap<String,Integer> ();
-	private HashMap<String,Float> eSpecificity = new HashMap<String,Float> ();
+	// Calculated data - eCoverage and eSpecificity 
+	private HashMap<String,Integer> eCoverage = new HashMap<String,Integer> (); // host => eCoverage
+	private HashMap<String,Float> eSpecificity = new HashMap<String,Float> ();  // host => eSpecificity
 	
 	public Category (String name) {
 		this(name, ".");
 	}
 
 	public Category (String name, String path) {
-		this.name = name;
-		this.fullname = name; // Root
-		this.probepath = path;
-		this.probefile = this.probepath + pathDelimiter + name.toLowerCase() + ".txt";
-		buildHierarchy(this.probefile);
+		this(null, name, path); // root has no parent
 	}
 
 	public Category (Category parent, String name, String path) {
 		this.parent = parent;
 		this.name = name;
-		this.fullname = parent.getFullName() + pathDelimiter + name;
+		this.fullname = (parent == null) ? name : parent.getFullName() + pathDelimiter + name;
 		this.probepath = path;
 		this.probefile = this.probepath + pathDelimiter + name.toLowerCase() + ".txt";
 		buildHierarchy(this.probefile);
 	}
 	
-//	public void setParent(Category c) {
-//		parent = c;
-//		fullname = parent.getFullName() + "/" + name;
-//	}
-
 	public Category getParent() {
 		return parent;
 	}
@@ -100,16 +91,18 @@ public class Category {
 	}
 		
 	/**
-	 * Add unique url samples from the query probes for this category
+	 * Add url samples from the query probes
+	 * 
+	 * IMPORTANT NOTE:
+	 * this list of urls are not unique within the category. 
+	 * uniqueness verification is postponed to run time... 
+	 *	
 	 * @param docs
 	 */
-	public void addDocSample(ArrayList<String> urls) {
-		for (String url : urls) {
-			if (!docSample.contains(url))
-				docSample.add(url);
-		}
+	public void addDocSample(String query, ArrayList<String> urls) {
+		docSampleHash.put(query, urls);
 	}
-	
+
 	/**
 	 * read text file for sub-categories and probes
 	 */
@@ -150,23 +143,39 @@ public class Category {
 	 */
 	public void buildContentSummary(String host) {
 		HashMap<String, Integer> contentSumm = new HashMap<String, Integer> ();
+
+		// @@@ TODO: Document sample of a node = doc sample of current category + doc sample of child category
+		Set<String> probeSet = docSampleHash.keySet();
+		HashSet<String> seenUrl = new HashSet<String> (); // to check duplicate url
+		int count=0;
+		for (String probe: probeSet) {
+			System.out.println(++count + "/" + probeSet.size());
+			//System.out.println(++count + "/" + probeSet.size() + " " + probe); // debug
+			ArrayList<String> urls = docSampleHash.get(probe);
+			for (String url : urls) {
+				if (seenUrl.contains(url)) { // skip duplicate url
+					continue;
+				}
+				seenUrl.add(url);
 		
-		for (String url : docSample) {
-			try {
-				// Retrieve page with Lynx
-				System.out.println("\nGetting page: "+url +"\n");
-				Set<String> words = getWordsLynx.runLynx("lynx",url);
-				
-				// @@@ TODO - Store in cache and use a progress counter
-				
-				// Merge new list with existing list
-				merge(contentSumm, words);
-				
-			} catch (Exception e) {
-				// Couldn't get URL	
-				System.err.println("WARNING: Could not retrieve "+url+" for extraction.");
+				try {
+					// Retrieve page with Lynx
+					System.out.println("\nGetting page: "+url +"\n");
+					Set<String> words = getWordsLynx.runLynx(url);
+
+					// @@@ TODO - Store in cache and use a progress counter
+
+					// Merge new list with existing list
+					merge(contentSumm, words);
+
+				} catch (Exception e) {
+					// Couldn't get URL	
+					System.err.println("WARNING: Could not retrieve "+url+" for extraction.");
+				}
+
 			}
 		}
+
 
 		// Format HashMap to string
 		ArrayList<String> sb = new ArrayList<String>();
