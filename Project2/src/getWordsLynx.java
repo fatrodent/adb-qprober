@@ -1,15 +1,38 @@
 import java.io.BufferedReader;
+import java.io.File;
+//import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 public class getWordsLynx {
-	
+	private static String[] lynxPaths = 
+	{
+		"/usr/bin/lynx",   // on cs system
+		"/lynx/lynx.bat"   // on my window's host
+	};
+
 	public static Set<String> runLynx(String url) {
-		return runLynx("/usr/local/bin/lynx", url);
+		// find the path of lynx on this system from the known locations
+		String lynxPath = null;
+		for (String lpath: lynxPaths) {
+			if ((new File(lpath)).exists()) {
+				lynxPath = lpath;
+				break;
+			}
+		}
+		if (lynxPath == null) {
+			System.err.println("WARNING: lynx not in known paths, will leave it to system path");
+			lynxPath = "lynx"; // use system's path to find it
+		}
+		return runLynx(lynxPath, url);
 	}
 
+	public static void writeCache(StringBuffer buf) {
+		
+	}
+	
     public static Set<String> runLynx(String path, String url) {
         int buffersize = 40000;
         StringBuffer buffer = new StringBuffer(buffersize);
@@ -32,6 +55,9 @@ public class getWordsLynx {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
+        
+        // Cache file here
+        
         // Remove the References at the end of the dump
         int end = buffer.indexOf("\nReferences\n");
 
@@ -81,7 +107,10 @@ public class getWordsLynx {
         return document;
     }
 
-    public static void main(String args[]) {
-        runLynx(args[0]);
-    }
+//    public static void main(String args[]) {
+//        Set<String> ss = runLynx(args[0]);
+//        for (String s: ss) {
+//        	System.out.println(s);
+//        }
+//    }
 }
