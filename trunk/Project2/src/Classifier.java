@@ -1,5 +1,3 @@
-import java.util.*;
-
 /**
  *  Implements classifying algorithm based on Luis Gravano's QProber
  *  
@@ -8,6 +6,9 @@ import java.util.*;
  *  @author Nicole Lee (ncl2108)
  *  @author Laima Tazmin (lt2233)
  */
+
+import java.util.*;
+
 public class Classifier {
 	private YahooBossSearcher yahoo;
 	
