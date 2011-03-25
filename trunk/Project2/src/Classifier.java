@@ -8,11 +8,11 @@ import java.util.*;
  *  @author Nicole Lee (ncl2108)
  *  @author Laima Tazmin (lt2233)
  */
-public class Classifier2 {
+public class Classifier {
 	private YahooBossSearcher yahoo;
 	
 	// Pre-built category hierarchy.
-	public Classifier2(YahooBossSearcher yahoo) { // Category root) {
+	public Classifier(YahooBossSearcher yahoo) { // Category root) {
 		this.yahoo = yahoo;
 		//this.root = root;
 	}

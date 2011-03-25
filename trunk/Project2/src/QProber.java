@@ -25,7 +25,7 @@ public class QProber {
 		// workdir/cache     - writeable directory to cache pages
 		String workdir = args[i++];
 		String catdir  = workdir + "/categories";
-		String cachedir = workdir + "/cache";
+		//String cachedir = workdir + "/cache";
 
 		// Die if category directory does not exist 
 		if (! (new File(catdir)).exists()) {		
@@ -33,11 +33,11 @@ public class QProber {
 			System.exit(1);
 		}
 		// Create cachedir if it does not exist
-		File cdir= new File(cachedir);
-		if (! cdir.exists() && ! cdir.mkdir()) {		
-			System.err.println("Unable to mkdir " + cachedir);
-			System.exit(1);
-		}
+//		File cdir= new File(cachedir);
+//		if (! cdir.exists() && ! cdir.mkdir()) {		
+//			System.err.println("Unable to mkdir " + cachedir);
+//			System.exit(1);
+//		}
 		
 		// Set search string
 		String host = args[i++];
@@ -79,14 +79,13 @@ public class QProber {
 		Category root = new Category("Root", catdir);		
 
 		// QProber
-		YahooBossSearcher yahoo = new YahooBossSearcher(appid, cachedir);
-		Classifier2 c = new Classifier2(yahoo);
+		YahooBossSearcher yahoo = new YahooBossSearcher(appid);
+		Classifier c = new Classifier(yahoo);
 		
 		System.out.println("\n\nClassifying...");
 		ArrayList<Category> clist = c.classify(root, host, t_ec, t_es, 1);
 
 		System.out.println("\n\nClassification:");
-		// @@@ - seems like it only ever returns one category, loop isn't necessary?
 		for (Category cat: clist) {
 			System.out.println(cat.getFullName());
 		}
