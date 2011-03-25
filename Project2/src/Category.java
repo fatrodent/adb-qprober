@@ -1,3 +1,12 @@
+/**
+ *  Store classification hierarchy, query probes, and document samples
+ *  
+ *  COMS E6111 - Project 2  03/25/2011
+ *  
+ *  @author Nicole Lee (ncl2108)
+ *  @author Laima Tazmin (lt2233)
+ */
+
 import java.io.*;
 import java.util.*;
 

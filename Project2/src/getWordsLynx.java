@@ -1,3 +1,12 @@
+/**
+ *  Modified code provided by Prof. Gravano
+ *  
+ *  COMS E6111 - Project 2  03/25/2011
+ *  
+ *  @author Nicole Lee (ncl2108)
+ *  @author Laima Tazmin (lt2233)
+ */
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -28,7 +37,6 @@ public class getWordsLynx {
 		return runLynx(lynxPath, url);
 	}
 
-    
     public static Set<String> runLynx(String path, String url) {
         int buffersize = 40000;
         StringBuffer buffer = new StringBuffer(buffersize);
