@@ -53,6 +53,7 @@ public class QProber {
 	    }
 	    if (t_es < 0 || t_es > 1) {
 	    	System.err.println("Invalid value for t_es. Specificity threshold must be between 0 and 1.");
+	        System.exit(1);	    	
 	    }
 
 		int t_ec = 0;
@@ -64,6 +65,7 @@ public class QProber {
 	    }
 	    if (t_ec < 1) {
 	    	System.err.println("Invalid value for t_ec. Coverage threshold must be >= 1.");
+	        System.exit(1);	    	
 	    }
 		
 		// Set appid (optional)
