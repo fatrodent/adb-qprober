@@ -147,7 +147,7 @@ public class Category {
 		// @@@ TODO: Document sample of a node = doc sample of current category + doc sample of child category
 		Set<String> probeSet = docSampleHash.keySet();
 		HashSet<String> seenUrl = new HashSet<String> (); // to check duplicate url
-		int count=0;
+		int count=0; // progress counter
 		for (String probe: probeSet) {
 			System.out.println(++count + "/" + probeSet.size());
 			//System.out.println(++count + "/" + probeSet.size() + " " + probe); // debug
@@ -162,8 +162,6 @@ public class Category {
 					// Retrieve page with Lynx
 					System.out.println("\nGetting page: "+url +"\n");
 					Set<String> words = getWordsLynx.runLynx(url);
-
-					// @@@ TODO - Store in cache and use a progress counter
 
 					// Merge new list with existing list
 					merge(contentSumm, words);

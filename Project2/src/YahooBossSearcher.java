@@ -12,12 +12,15 @@ import java.io.*;
 
 public class YahooBossSearcher {
 	private String _appid;
-	private String _cachedir;
+	//private String _cachedir;
 	private String _urlbase = "http://boss.yahooapis.com/ysearch/web/v1/";
 
-	public YahooBossSearcher (String appid, String cachedir) {
+//	public YahooBossSearcher (String appid, String cachedir) {
+//		_appid = appid;
+//		_cachedir = cachedir;
+//	}
+	public YahooBossSearcher (String appid) {
 		_appid = appid;
-		_cachedir = cachedir;
 	}
 
 	public YahooResults search (String term) {
