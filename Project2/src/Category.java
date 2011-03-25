@@ -15,6 +15,7 @@ public class Category {
 
 	// maps query string to top 4 doc samples
 	private HashMap<String,ArrayList<String>> docSampleHash = new HashMap<String,ArrayList<String>> ();
+	private HashMap<String,ArrayList<String>> childDocSampleHash = null;
 	
 	// Calculated data - eCoverage and eSpecificity 
 	private HashMap<String,Integer> eCoverage = new HashMap<String,Integer> (); // host => eCoverage
@@ -102,7 +103,48 @@ public class Category {
 	public void addDocSample(String query, ArrayList<String> urls) {
 		docSampleHash.put(query, urls);
 	}
-
+	
+	/**
+	 * Store the child's document samples
+	 * The method is used to pass the url's from child to parent during bottom-up document sampling.
+	 * 
+	 * @param childDocSampleHash
+	 */
+	public void addChildDocSample(HashMap<String,ArrayList<String>> childDocSampleHash) {
+		this.childDocSampleHash = childDocSampleHash;
+	}
+	
+	/**
+	 * Merge this node's document sample and the child's document sample
+	 * to create one single document sample.
+	 */
+	public HashMap<String,ArrayList<String>> getDocSample() {
+		HashMap<String,ArrayList<String>> tmpDocSampleHash = new HashMap<String,ArrayList<String>> (); 
+		tmpDocSampleHash.putAll(docSampleHash);  // merge a copy of the node's document sample
+		if (childDocSampleHash != null) {        // and child's document sample
+			//tmpDocSampleHash.putAll(childDocSampleHash);
+			for (String query : childDocSampleHash.keySet()) {
+				if ( tmpDocSampleHash.containsKey(query) ) {
+					// if the child and parent both use the same query string
+					// merge the document samples, eliminating the duplicate url's
+					for (String url : childDocSampleHash.get(query)) {
+						if (! tmpDocSampleHash.get(query).contains(url)) {
+							tmpDocSampleHash.get(query).add(url);							
+						}
+					}
+					// if the child and parent both use the same query string
+					// the document sample would be the union of both samples
+					// duplicate url checks are deferred, at run time
+					//tmpDocSampleHash.get(query).addAll(childDocSampleHash.get(query));
+				} else {
+					tmpDocSampleHash.put(query, childDocSampleHash.get(query));
+				}
+			}
+			
+		}
+		return tmpDocSampleHash;
+	}
+		
 	/**
 	 * read text file for sub-categories and probes
 	 */
@@ -144,14 +186,16 @@ public class Category {
 	public void buildContentSummary(String host) {
 		HashMap<String, Integer> contentSumm = new HashMap<String, Integer> ();
 
-		// @@@ TODO: Document sample of a node = doc sample of current category + doc sample of child category
-		Set<String> probeSet = docSampleHash.keySet();
-		HashSet<String> seenUrl = new HashSet<String> (); // to check duplicate url
+		// Document sample of a node = doc sample of the category + doc sample of child category
+		HashMap<String,ArrayList<String>> tmpDocSampleHash = getDocSample();
+
+		// Record document url's that were seen, to eliminate duplicate documents
+		HashSet<String> seenUrl = new HashSet<String> ();
 		int count=0; // progress counter
-		for (String probe: probeSet) {
-			System.out.println(++count + "/" + probeSet.size());
-			//System.out.println(++count + "/" + probeSet.size() + " " + probe); // debug
-			ArrayList<String> urls = docSampleHash.get(probe);
+		for (String probe: tmpDocSampleHash.keySet()) {
+			System.out.println(++count + "/" + tmpDocSampleHash.size());
+			//System.out.println(++count + "/" + tmpDocSampleHash.size() + " " + probe); // debug
+			ArrayList<String> urls = tmpDocSampleHash.get(probe);
 			for (String url : urls) {
 				if (seenUrl.contains(url)) { // skip duplicate url
 					continue;
@@ -162,7 +206,8 @@ public class Category {
 					// Retrieve page with Lynx
 					System.out.println("\nGetting page: "+url +"\n");
 					Set<String> words = getWordsLynx.runLynx(url);
-
+					//System.out.println("got page"); // DEBUG
+					
 					// Merge new list with existing list
 					merge(contentSumm, words);
 
@@ -171,10 +216,14 @@ public class Category {
 					System.err.println("WARNING: Could not retrieve "+url+" for extraction.");
 				}
 
-			}
+			} // end for(url)
+		} // end for(probe)
+
+		// Passes child's document samples upward to the parent category
+		if (! this.isRoot()) { 
+			this.parent.addChildDocSample(tmpDocSampleHash);
 		}
-
-
+		
 		// Format HashMap to string
 		ArrayList<String> sb = new ArrayList<String>();
 		for (Map.Entry<String, Integer> m : contentSumm.entrySet()) {
@@ -185,9 +234,8 @@ public class Category {
 		
 		// Create file
 		writeContentSummary(sb, host);
-		
-		// DEBUG: Print to console
-		//System.out.println(sb);
+
+		//System.out.println(sb);  // DEBUG
 	}
 	
 	/**

@@ -47,8 +47,7 @@ public class Classifier {
 				int matches = results.getCoverage();
 				cov += matches;
 				// Store doc samples
-				//c.addDocSample(results.getURLs());
-				c.addDocSample(probe, results.getURLs()); // @@@ TEST
+				c.addDocSample(probe, results.getURLs());
 			}
 			subcat.setECoverage(d,cov);
 		}

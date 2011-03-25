@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.File;
-//import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -29,17 +28,14 @@ public class getWordsLynx {
 		return runLynx(lynxPath, url);
 	}
 
-	public static void writeCache(StringBuffer buf) {
-		
-	}
-	
+    
     public static Set<String> runLynx(String path, String url) {
         int buffersize = 40000;
         StringBuffer buffer = new StringBuffer(buffersize);
 
         try {
         	
-            String cmdline[] = {path, "--dump", url };
+            String cmdline[] = {path, "-connect_timeout=20 --dump ", url};
             Process p = Runtime.getRuntime().exec(cmdline);
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
@@ -56,8 +52,7 @@ public class getWordsLynx {
             e.printStackTrace();
         }
         
-        // Cache file here
-        
+
         // Remove the References at the end of the dump
         int end = buffer.indexOf("\nReferences\n");
 
@@ -108,9 +103,15 @@ public class getWordsLynx {
     }
 
 //    public static void main(String args[]) {
-//        Set<String> ss = runLynx(args[0]);
+//    	String url = "http://connect.diabetes.org/app/render/go.aspx?utm_source=Homepage&utm_medium=FeatureSlider7&utm_content=OnlineCommunity&utm_campaign=COMM&xsl=tp_community.xslt&cons_id=&ts=1287711773&signature=5d1f7973c5a5319053ceabbb0d403c5a";
+//
+//    	//Set<String> ss = runLynx(args[0]);
+//    	Set<String> ss = runLynx(url);
 //        for (String s: ss) {
 //        	System.out.println(s);
 //        }
 //    }
 }
+
+
+

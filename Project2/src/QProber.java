@@ -69,11 +69,11 @@ public class QProber {
 		String appid = (args.length > i) ? args[i++] : 
 			"ypykm2bV34HB8360S0knusfiUrQYS5A3ZvDlsTIHh13Vw8BPYSUHNloyoJ2bSg--";
 
-		System.out.println("DEBUG: workdir = " + workdir);
-		System.out.println("DEBUG: host = " + host);
-		System.out.println("DEBUG: t_es = " + t_es);
-		System.out.println("DEBUG: t_ec = " + t_ec);
-		System.out.println("DEBUG: appid = " + appid);
+//		System.out.println("DEBUG: workdir = " + workdir);
+//		System.out.println("DEBUG: host = " + host);
+//		System.out.println("DEBUG: t_es = " + t_es);
+//		System.out.println("DEBUG: t_ec = " + t_ec);
+//		System.out.println("DEBUG: appid = " + appid);
 
 		// Get the probes from files, and build the classification hierarchy
 		Category root = new Category("Root", catdir);		
