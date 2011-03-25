@@ -43,7 +43,7 @@ public class getWordsLynx {
 
         try {
         	
-            String cmdline[] = {path, "-connect_timeout=20 --dump ", url};
+            String cmdline[] = {path, "--dump", url};
             Process p = Runtime.getRuntime().exec(cmdline);
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
